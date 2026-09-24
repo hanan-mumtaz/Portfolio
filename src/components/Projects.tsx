@@ -232,14 +232,24 @@ export default function Projects() {
     return projects.filter((p) => p.category === selectedCategory);
   }, [selectedCategory]);
 
-  // Handle escape key to close modal
+  // Handle escape key and lock background body scrolling when modal is active
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setActiveModalProject(null);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+
+    if (activeModalProject) {
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
+    } else {
+      document.body.style.overflow = '';
+    }
+
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [activeModalProject]);
 
   return (
     <section id="projects" className="py-24 bg-[#050508] text-zinc-100 relative overflow-hidden">
@@ -363,45 +373,45 @@ export default function Projects() {
         )}
       </div>
 
-      {/* Project Detail Modal - Mounted via Portal to document.body so it is never trapped under Header */}
+      {/* Project Detail Modal - Mounted via Portal to document.body strictly between Header and bottom */}
       {typeof document !== 'undefined' &&
         createPortal(
           <AnimatePresence>
             {activeModalProject && (
               <div
-                className="fixed inset-0 z-[9999] overflow-y-auto bg-black/85 backdrop-blur-md flex items-center justify-center p-3.5 pt-20 pb-8 sm:p-6 sm:pt-24"
+                className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md flex flex-col items-center p-3 pt-24 pb-8 sm:p-6 sm:pt-24 sm:pb-8"
                 onClick={(e) => {
                   if (e.target === e.currentTarget) setActiveModalProject(null);
                 }}
               >
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
                   transition={{ duration: 0.25 }}
-                  className="bg-zinc-950 border border-purple-500/40 rounded-2xl max-w-2xl w-full max-h-[86vh] flex flex-col shadow-2xl shadow-purple-950/60 relative my-auto overflow-hidden"
+                  className="bg-zinc-950 border border-purple-500/40 rounded-2xl max-w-2xl w-full max-h-[calc(100vh-140px)] flex flex-col shadow-2xl shadow-purple-950/70 relative my-auto overflow-hidden"
                 >
-                  {/* Close Button - absolute and always visible */}
+                  {/* Close Button - prominent, always accessible */}
                   <button
                     onClick={() => setActiveModalProject(null)}
-                    className="absolute top-3 right-3 z-50 p-2 rounded-full bg-zinc-900/85 hover:bg-purple-600 text-zinc-200 hover:text-white border border-zinc-700 hover:border-purple-400 shadow-xl transition-all backdrop-blur-md"
+                    className="absolute top-3.5 right-3.5 z-50 p-2.5 rounded-full bg-zinc-900/90 hover:bg-purple-600 text-zinc-200 hover:text-white border border-zinc-700 hover:border-purple-400 shadow-xl transition-all backdrop-blur-md"
                     aria-label="Close modal"
                   >
                     <X size={18} />
                   </button>
 
                   {/* Modal Banner */}
-                  <div className="relative h-44 sm:h-60 w-full overflow-hidden bg-zinc-900 flex-shrink-0">
+                  <div className="relative h-44 sm:h-52 w-full overflow-hidden bg-zinc-900 flex-shrink-0">
                     <img
                       src={activeModalProject.image}
                       alt={activeModalProject.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover object-top"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = activeModalProject.fallbackImage;
                       }}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
-                    <div className="absolute bottom-3.5 left-5 right-12">
+                    <div className="absolute bottom-3 left-5 right-14">
                       <span className="px-2.5 py-1 rounded-full bg-purple-600/90 text-white text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5 inline-block">
                         {activeModalProject.category}
                       </span>
@@ -412,7 +422,7 @@ export default function Projects() {
                   </div>
 
                   {/* Modal Body - Scrollable content */}
-                  <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+                  <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
                     <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed">
                       {activeModalProject.longDescription || activeModalProject.description}
                     </p>
