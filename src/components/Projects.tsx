@@ -325,7 +325,7 @@ export default function Projects() {
               }}
               navigation={true}
               pagination={{ clickable: true, dynamicBullets: true }}
-              autoplay={{ delay: 6000, disableOnInteraction: false, pauseOnMouseEnter: true }}
+              autoplay={activeModalProject ? false : { delay: 6000, disableOnInteraction: false, pauseOnMouseEnter: true }}
               grabCursor={true}
               touchRatio={1.2}
               resistance={true}
@@ -364,18 +364,19 @@ export default function Projects() {
       {/* Project Detail Modal */}
       <AnimatePresence>
         {activeModalProject && (
-          <div className="fixed inset-0 z-50 flex mt-14 items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="fixed inset-0 z-50 flex mt-14 items-center justify-center p-4 bg-black/85 backdrop-blur-sm">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.25 }}
-              className="bg-zinc-950 border border-purple-500/30 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative"
+              style={{ WebkitOverflowScrolling: 'touch', transform: 'translateZ(0)' }}
+              className="bg-zinc-950 border border-purple-500/30 rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl relative overscroll-contain"
             >
               {/* Close Button */}
               <button
                 onClick={() => setActiveModalProject(null)}
-                className="sticky top-4 float-right mr-4 -mb-10 p-2 rounded-full bg-zinc-900/90 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors z-30 shadow-lg backdrop-blur-md"
+                className="sticky top-4 float-right mr-4 -mb-10 p-2 rounded-full bg-zinc-900/90 text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors z-30 shadow-lg backdrop-blur-sm"
                 aria-label="Close modal"
               >
                 <X size={20} />

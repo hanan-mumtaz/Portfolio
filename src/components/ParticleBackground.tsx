@@ -85,8 +85,26 @@ export default function ParticleBackground() {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    const animate = () => {
+    let lastFrameTime = 0;
+    const targetFps = isMobile ? 30 : 60;
+    const frameInterval = 1000 / targetFps;
+
+    const animate = (timestamp: number) => {
       if (!isPageVisible) return;
+
+      // Throttle frame rate (e.g. 30 FPS on mobile saves 75% GPU cycles on 120Hz iPhone ProMotion)
+      const elapsed = timestamp - lastFrameTime;
+      if (elapsed < frameInterval) {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
+      lastFrameTime = timestamp - (elapsed % frameInterval);
+
+      // Pause canvas rendering if a modal is open
+      if (document.body.style.overflow === 'hidden') {
+        animationFrameId = requestAnimationFrame(animate);
+        return;
+      }
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -174,6 +192,7 @@ export default function ParticleBackground() {
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
       className="fixed inset-0 pointer-events-none z-[1]"
+      style={{ willChange: 'transform', transform: 'translateZ(0)' }}
       aria-hidden="true"
     />
   );
