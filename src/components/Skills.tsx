@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Layout, Server, Database, Brain, Sparkles } from 'lucide-react';
+import { useIsMobile } from '../utils/useIsMobile';
 
 interface SkillItem {
   name: string;
@@ -58,27 +59,28 @@ const skillCategories: SkillCategory[] = [
     description: 'High-availability data stores, schema design, and CI/CD pipelines.',
     skills: [
       { name: 'MongoDB & NoSQL Aggregation', level: 90 },
-      { name: 'SQL (PostgreSQL & MySQL)', level: 82 },
       { name: 'Git & GitHub Workflows', level: 88 },
-      { name: 'Docker & Cloud Deployment', level: 78 },
+      { name: 'REST API Integration', level: 92 },
+      { name: 'Performance Optimization', level: 82 },
     ],
-    technologies: ['MongoDB', 'PostgreSQL', 'MySQL', 'Firebase', 'Git', 'Docker'],
+    technologies: ['MongoDB', 'SQL', 'Git', 'GitHub Actions', 'Postman', 'Docker Basics'],
   },
 ];
 
 export default function Skills() {
+  const isMobile = useIsMobile();
   const [activeCategory, setActiveCategory] = useState<number | null>(null);
 
   return (
     <section id="skills" className="py-24 bg-[#050508] text-zinc-100 relative overflow-hidden">
-      {/* Background Glow */}
+      {/* Background Glows */}
       <div className="absolute top-1/2 right-0 w-[500px] h-[300px] bg-purple-900/10 rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute bottom-10 left-10 w-[400px] h-[250px] bg-zinc-800/15 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="container mx-auto px-4 md:px-8 max-w-7xl relative z-10">
         {/* Section Heading */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-2xl mx-auto mb-16"
@@ -106,10 +108,10 @@ export default function Skills() {
             return (
               <motion.div
                 key={category.name}
-                initial={{ opacity: 0, y: 25 }}
+                initial={isMobile ? false : { opacity: 0, y: 25 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ delay: i * 0.1, duration: 0.5 }}
+                transition={{ delay: isMobile ? 0 : i * 0.1, duration: 0.5 }}
                 onMouseEnter={() => setActiveCategory(i)}
                 onMouseLeave={() => setActiveCategory(null)}
                 className={`bg-zinc-900/50 rounded-2xl p-6 border transition-all duration-300 flex flex-col justify-between backdrop-blur-sm ${
@@ -145,10 +147,10 @@ export default function Skills() {
                         </div>
                         <div className="h-2 bg-zinc-800/90 rounded-full overflow-hidden p-0.5 border border-zinc-700/40">
                           <motion.div
-                            initial={{ width: 0 }}
+                            initial={isMobile ? { width: `${skill.level}%` } : { width: 0 }}
                             whileInView={{ width: `${skill.level}%` }}
                             viewport={{ once: true }}
-                            transition={{ duration: 0.8, delay: 0.2, ease: 'easeOut' }}
+                            transition={{ duration: 0.8, delay: isMobile ? 0 : 0.2, ease: 'easeOut' }}
                             className="h-full rounded-full bg-gradient-to-r from-purple-600 via-purple-500 to-fuchsia-400 shadow-xs"
                           />
                         </div>
@@ -177,7 +179,7 @@ export default function Skills() {
 
         {/* Interactive Bottom Banner */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.3 }}

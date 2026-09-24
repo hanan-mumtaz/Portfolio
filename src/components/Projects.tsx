@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Autoplay, Keyboard } from 'swiper/modules';
 import { Github, ExternalLink, Info, X, LayoutGrid, SlidersHorizontal, Check } from 'lucide-react';
+import { useIsMobile } from '../utils/useIsMobile';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
@@ -220,6 +221,7 @@ const ProjectCard: React.FC<ProjectCardProps> = React.memo(({ project, onSelect 
 });
 
 export default function Projects() {
+  const isMobile = useIsMobile();
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [activeModalProject, setActiveModalProject] = useState<Project | null>(null);
   const [viewMode, setViewMode] = useState<'carousel' | 'grid'>('carousel');
@@ -248,7 +250,7 @@ export default function Projects() {
       <div className="container mx-auto px-4 md:px-8 max-w-7xl relative z-10">
         {/* Section Heading */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-2xl mx-auto mb-12"
@@ -350,7 +352,7 @@ export default function Projects() {
               <motion.div
                 layout
                 key={`${project.title}-${index}`}
-                initial={{ opacity: 0, scale: 0.95 }}
+                initial={isMobile ? false : { opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
               >

@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin, Send, Copy, Check, MessageSquare } from 'lucide-react';
+import { useIsMobile } from '../utils/useIsMobile';
 
 export default function Contact() {
+  const isMobile = useIsMobile();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -46,7 +48,7 @@ export default function Contact() {
       <div className="container mx-auto px-4 md:px-8 max-w-6xl relative z-10">
         {/* Section Header */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={isMobile ? false : { opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           className="text-center max-w-2xl mx-auto mb-16"
@@ -68,7 +70,7 @@ export default function Contact() {
         <div className="grid lg:grid-cols-12 gap-8 sm:gap-10 items-start">
           {/* Left Column: Contact Cards */}
           <motion.div
-            initial={{ opacity: 0, x: -25 }}
+            initial={isMobile ? false : { opacity: 0, x: -25 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
@@ -144,7 +146,7 @@ export default function Contact() {
 
           {/* Right Column: Interactive Form */}
           <motion.div
-            initial={{ opacity: 0, x: 25 }}
+            initial={isMobile ? false : { opacity: 0, x: 25 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5 }}
@@ -180,13 +182,7 @@ export default function Contact() {
                 </button>
               </motion.div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
-                {errorMsg && (
-                  <div className="p-3 rounded-lg bg-red-950/60 border border-red-500/40 text-red-200 text-xs">
-                    {errorMsg}
-                  </div>
-                )}
-
+              <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
                     <label htmlFor="name" className="block text-xs font-semibold text-zinc-300 mb-1.5">
@@ -195,14 +191,13 @@ export default function Contact() {
                     <input
                       type="text"
                       id="name"
+                      required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Alex Smith"
-                      required
-                      className="w-full px-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                      placeholder="e.g. Sarah Smith"
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-zinc-100 placeholder-zinc-600 text-sm outline-none transition-all"
                     />
                   </div>
-
                   <div>
                     <label htmlFor="email" className="block text-xs font-semibold text-zinc-300 mb-1.5">
                       Your Email <span className="text-purple-400">*</span>
@@ -210,26 +205,26 @@ export default function Contact() {
                     <input
                       type="email"
                       id="email"
+                      required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="alex@example.com"
-                      required
-                      className="w-full px-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                      placeholder="sarah@company.com"
+                      className="w-full px-4 py-3 rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-zinc-100 placeholder-zinc-600 text-sm outline-none transition-all"
                     />
                   </div>
                 </div>
 
                 <div>
                   <label htmlFor="subject" className="block text-xs font-semibold text-zinc-300 mb-1.5">
-                    Subject / Project Type
+                    Subject
                   </label>
                   <input
                     type="text"
                     id="subject"
                     value={formData.subject}
                     onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                    placeholder="e.g. Full Stack Web Application / Mobile App Project"
-                    className="w-full px-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors"
+                    placeholder="Project Inquiry, Mentorship, or Collaboration"
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-zinc-100 placeholder-zinc-600 text-sm outline-none transition-all"
                   />
                 </div>
 
@@ -239,21 +234,27 @@ export default function Contact() {
                   </label>
                   <textarea
                     id="message"
+                    required
                     rows={4}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                    placeholder="Describe your vision, timeline, or requirements..."
-                    required
-                    className="w-full px-4 py-3 bg-zinc-950/80 border border-zinc-800 rounded-xl text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none focus:border-purple-500 focus:ring-1 focus:ring-purple-500 transition-colors resize-none"
+                    placeholder="Hi Hanan, I checked out your projects and would love to connect about..."
+                    className="w-full px-4 py-3 rounded-xl bg-zinc-950/80 border border-zinc-800 focus:border-purple-500 focus:ring-1 focus:ring-purple-500 text-zinc-100 placeholder-zinc-600 text-sm outline-none transition-all resize-none"
                   />
                 </div>
 
+                {errorMsg && (
+                  <p className="text-red-400 text-xs font-medium bg-red-950/30 border border-red-500/20 px-3.5 py-2 rounded-lg">
+                    {errorMsg}
+                  </p>
+                )}
+
                 <button
                   type="submit"
-                  className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-purple-900/40 hover:shadow-purple-700/50 hover:scale-[1.01]"
+                  className="w-full py-3.5 px-6 rounded-xl bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-500 hover:to-purple-600 text-white font-semibold text-sm shadow-lg shadow-purple-900/40 hover:shadow-purple-600/50 hover:scale-[1.01] transition-all flex items-center justify-center gap-2 group"
                 >
-                  <Send size={16} />
-                  <span>Send Message via Email Client</span>
+                  <span>Send Message via Email</span>
+                  <Send size={16} className="group-hover:translate-x-1 group-hover:-translate-y-0.5 transition-transform" />
                 </button>
               </form>
             )}

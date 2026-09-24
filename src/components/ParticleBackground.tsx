@@ -49,7 +49,7 @@ export default function ParticleBackground() {
     const cores = navigator.hardwareConcurrency || 4;
     const isHighGfx = !isMobile && cores >= 4;
     // Adapt particle count to device tier: light on mobile, rich on desktop
-    const particleCount = isMobile ? 16 : isHighGfx ? 50 : 28;
+    const particleCount = isMobile ? 14 : isHighGfx ? 45 : 24;
 
     const particles: Particle[] = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
@@ -194,4 +194,3 @@ export default function ParticleBackground() {
     />
   );
 }
-

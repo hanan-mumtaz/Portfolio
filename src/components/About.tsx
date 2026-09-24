@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Code, Smartphone, Server, Brain, Award, GraduationCap, CheckCircle2 } from 'lucide-react';
-
-const fadeInUp = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.15 },
-  transition: { duration: 0.45, ease: 'easeOut' },
-};
+import { useIsMobile } from '../utils/useIsMobile';
 
 export default function About() {
+  const isMobile = useIsMobile();
   const [imgError, setImgError] = useState(false);
   const profileFallback = `${import.meta.env.BASE_URL}assets/profile-D6iLI1Rc.jpg`;
+
+  const fadeInUp = {
+    initial: isMobile ? false : { opacity: 0, y: 20 },
+    whileInView: { opacity: 1, y: 0 },
+    viewport: { once: true, amount: isMobile ? 0 : 0.15 },
+    transition: { duration: 0.45, ease: 'easeOut' },
+  };
 
   const capabilities = [
     {
@@ -189,4 +191,3 @@ export default function About() {
     </section>
   );
 }
-

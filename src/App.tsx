@@ -1,4 +1,5 @@
 import React from 'react';
+import { MotionConfig } from 'framer-motion';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -12,31 +13,33 @@ import ScrollToTop from './components/ScrollToTop';
 
 function App() {
   return (
-    <div className="bg-[#050508] text-zinc-100 min-h-screen relative overflow-x-hidden selection:bg-purple-500/30 selection:text-white">
-      {/* Subtle Interactive Ambient Lighting */}
-      <CursorGlow />
+    <MotionConfig reducedMotion="never">
+      <div className="bg-[#050508] text-zinc-100 min-h-screen relative overflow-x-hidden selection:bg-purple-500/30 selection:text-white">
+        {/* Subtle Interactive Ambient Lighting */}
+        <CursorGlow />
 
-      {/* Dynamic Canvas Particles */}
-      <ParticleBackground />
+        {/* Dynamic Canvas Particles */}
+        <ParticleBackground />
 
-      {/* Fixed Header */}
-      <Header />
+        {/* Fixed Header */}
+        <Header />
 
-      {/* Main Content Sections */}
-      <main className="relative">
-        <Hero />
-        <About />
-        <Projects />
-        <Skills />
-        <Contact />
-      </main>
+        {/* Main Content Sections */}
+        <main className="relative z-10">
+          <Hero />
+          <About />
+          <Projects />
+          <Skills />
+          <Contact />
+        </main>
 
-      {/* Global Footer */}
-      <Footer />
+        {/* Global Footer */}
+        <Footer />
 
-      {/* Floating Scroll to Top with Progress Circle */}
-      <ScrollToTop />
-    </div>
+        {/* Floating Scroll to Top with Progress Circle */}
+        <ScrollToTop />
+      </div>
+    </MotionConfig>
   );
 }
 

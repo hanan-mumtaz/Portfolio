@@ -1,6 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, Code, Sparkles, Zap, Terminal, Layers, ArrowRight } from 'lucide-react';
+import { useIsMobile } from '../utils/useIsMobile';
 
 const defaultSpring = {
   type: 'spring',
@@ -9,23 +10,15 @@ const defaultSpring = {
 };
 
 export default function Hero() {
+  const isMobile = useIsMobile();
   const [imgError, setImgError] = useState(false);
-  const [deviceTier, setDeviceTier] = useState<{ isHighGfx: boolean; isMobile: boolean }>({
-    isHighGfx: true,
-    isMobile: false,
-  });
+  const [isHighGfx, setIsHighGfx] = useState(false);
 
   useEffect(() => {
-    const isMobileDevice = window.innerWidth < 768 || 'ontouchstart' in window;
     const cores = navigator.hardwareConcurrency || 4;
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setDeviceTier({
-      isMobile: isMobileDevice,
-      isHighGfx: !isMobileDevice && cores >= 4 && !prefersReducedMotion,
-    });
-  }, []);
-
-  const { isHighGfx, isMobile } = deviceTier;
+    setIsHighGfx(!isMobile && cores >= 4 && !prefersReducedMotion);
+  }, [isMobile]);
 
   const floatingIcons = useMemo(
     () => [
@@ -89,13 +82,13 @@ export default function Hero() {
           {/* Left Text Column */}
           <motion.div
             className="flex-1 text-center lg:text-left"
-            initial={{ opacity: 0, y: 20 }}
+            initial={isMobile ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
             {/* Status Pill */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={isMobile ? false : { opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.15 }}
               className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/80 border border-purple-500/30 text-xs font-medium text-purple-300 mb-5 backdrop-blur-md shadow-sm"
@@ -113,7 +106,7 @@ export default function Hero() {
 
             <motion.p
               className="text-sm sm:text-base md:text-lg text-zinc-400 mb-7 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-normal"
-              initial={{ opacity: 0, y: 10 }}
+              initial={isMobile ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.25, duration: 0.5 }}
             >
@@ -127,7 +120,7 @@ export default function Hero() {
             {/* CTAs */}
             <motion.div
               className="flex flex-col sm:flex-row gap-3.5 justify-center lg:justify-start items-center"
-              initial={{ opacity: 0, y: 10 }}
+              initial={isMobile ? false : { opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.35 }}
             >
@@ -150,7 +143,7 @@ export default function Hero() {
             {/* Honest Stats Grid */}
             <motion.div
               className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-10 pt-6 border-t border-zinc-800/80 max-w-xl mx-auto lg:mx-0"
-              initial={{ opacity: 0 }}
+              initial={isMobile ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.45, duration: 0.5 }}
             >
@@ -168,7 +161,7 @@ export default function Hero() {
           {/* Right Profile Column: Dynamic GFX Rotating Backdrop Cards */}
           <motion.div
             className="flex-1 w-full max-w-xs sm:max-w-md"
-            initial={{ opacity: 0, scale: 0.95 }}
+            initial={isMobile ? false : { opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
@@ -250,4 +243,3 @@ export default function Hero() {
     </section>
   );
 }
-
