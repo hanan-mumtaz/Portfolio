@@ -15,11 +15,19 @@ export default function ParticleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
+    // Respect reduced motion preferences
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+
+    let animationFrameId: number;
+    let isPageVisible = true;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -27,43 +35,64 @@ export default function ParticleBackground() {
     };
 
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resizeCanvas, { passive: true });
 
-    const colors = ['rgba(147, 51, 234, ', 'rgba(59, 130, 246, '];
-    const isMobile = window.innerWidth < 768;
-    const particleCount = isMobile ? 50 : 100;
+    // Black, Purple, and Grey palette
+    const colors = [
+      'rgba(168, 85, 247, ', // vibrant purple
+      'rgba(192, 132, 252, ', // light lavender
+      'rgba(147, 51, 234, ',  // deep purple
+      'rgba(161, 161, 170, ', // zinc grey
+    ];
+
+    const isMobile = window.innerWidth < 640;
+    // Keep particle count low on mobile for battery saving and 60fps
+    const particleCount = isMobile ? 14 : 45;
 
     const particles: Particle[] = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 2 + 1,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.3 + 0.2,
+      size: Math.random() * 1.8 + 0.8,
+      speedX: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.35),
+      speedY: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.35),
+      opacity: Math.random() * 0.3 + 0.15,
       color: colors[Math.floor(Math.random() * colors.length)],
     }));
 
-    let mouseX = 0;
-    let mouseY = 0;
-    let mouseMovedAt = Date.now();
+    let mouseX = -1000;
+    let mouseY = -1000;
+    let mouseMovedAt = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
       mouseMovedAt = Date.now();
     };
-    window.addEventListener('mousemove', handleMouseMove);
+
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    }
+
+    // Pause rendering when tab is hidden to save mobile battery
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     const animate = () => {
+      if (!isPageVisible) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const now = Date.now();
-      const mouseActive = now - mouseMovedAt < 200;
+      const mouseActive = !isMobile && now - mouseMovedAt < 250;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-  
         p.x += p.speedX;
         p.y += p.speedY;
 
@@ -71,22 +100,11 @@ export default function ParticleBackground() {
           const dx = mouseX - p.x;
           const dy = mouseY - p.y;
           const dist = Math.hypot(dx, dy);
-          if (dist < 100) {
+          if (dist < 100 && dist > 0) {
             const angle = Math.atan2(dy, dx);
-            p.speedX -= Math.cos(angle) * 0.05;
-            p.speedY -= Math.sin(angle) * 0.05;
+            p.speedX -= Math.cos(angle) * 0.03;
+            p.speedY -= Math.sin(angle) * 0.03;
           }
-        }
-
-      
-        p.speedX += (Math.random() - 0.5) * 0.01;
-        p.speedY += (Math.random() - 0.5) * 0.01;
-
-        const speed = Math.hypot(p.speedX, p.speedY);
-        const maxSpeed = 0.5;
-        if (speed > maxSpeed) {
-          p.speedX = (p.speedX / speed) * maxSpeed;
-          p.speedY = (p.speedY / speed) * maxSpeed;
         }
 
         if (p.x > canvas.width) p.x = 0;
@@ -100,30 +118,38 @@ export default function ParticleBackground() {
         ctx.fillStyle = p.color + p.opacity + ')';
         ctx.fill();
 
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const dist = dx * dx + dy * dy;
-          if (dist < 10000) {
-            const opacity = 0.1 * (1 - dist / 10000);
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(147, 51, 234, ${opacity})`;
-            ctx.stroke();
+        // Only calculate connecting lines on desktop to eliminate O(N^2) load on mobile
+        if (!isMobile) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 7500) {
+              const opacity = 0.07 * (1 - distSq / 7500);
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+              ctx.lineWidth = 0.7;
+              ctx.stroke();
+            }
           }
         }
       }
 
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
+      cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, []);
 
@@ -134,6 +160,8 @@ export default function ParticleBackground() {
       animate={{ opacity: 1 }}
       transition={{ duration: 1 }}
       className="fixed inset-0 pointer-events-none z-[1]"
+      aria-hidden="true"
     />
   );
 }
+
