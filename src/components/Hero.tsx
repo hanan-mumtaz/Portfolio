@@ -202,7 +202,7 @@ export default function Hero() {
               <div className="relative w-full h-full rounded-2xl overflow-hidden bg-zinc-950 border border-zinc-700/80 shadow-2xl p-1.5">
                 <div className="w-full h-full rounded-xl overflow-hidden relative group">
                   <img
-                    src={imgError ? profileFallback : 'https://res.cloudinary.com/dnkaadogz/image/upload/v1772966204/profile_wnucej.jpg'}
+                    src={imgError ? profileFallback : 'https://res.cloudinary.com/dnkaadogz/image/upload/v1772966191/about_jvyl6t.jpg'}
                     alt="Hanan Mumtaz - Frontend Developer"
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     fetchPriority="high"
@@ -219,9 +219,8 @@ export default function Hero() {
                 animate={isHighGfx ? { y: [0, -5, 0] } : undefined}
                 transition={isHighGfx ? { duration: 3.5, repeat: Infinity, ease: 'easeInOut' } : undefined}
               >
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/80 animate-pulse" />
                 <Code className="w-4 h-4 text-purple-400" />
-                <span>Frontend Developer</span>
+                <span>AI & Deep Learning</span>
               </motion.div>
 
               {/* Badge 2: Full-Stack & React */}
@@ -231,7 +230,7 @@ export default function Hero() {
                 transition={isHighGfx ? { duration: 4, repeat: Infinity, ease: 'easeInOut', delay: 0.5 } : undefined}
               >
                 <Layers className="w-4 h-4 text-purple-400" />
-                <span>Full-Stack & React</span>
+                <span>Full-Stack Developer</span>
               </motion.div>
             </motion.div>
           </motion.div>
