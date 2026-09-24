@@ -28,9 +28,13 @@ export default function Footer() {
           {/* Logo / Brand */}
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
             <a href="#" className="flex items-center gap-2 group mb-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center text-white font-bold text-sm shadow-md shadow-purple-900/50 group-hover:scale-105 transition-transform">
-                HM
-              </div>
+              <img
+              src={logoImg}
+              alt="Logo"
+              className="h-7 w-7 sm:h-8 sm:w-8 object-contain transition-transform duration-300 group-hover:rotate-12"
+            />
+            <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-sm group-hover:bg-purple-500/40 transition-colors" />
+          </div>
               <span className="text-xl font-bold tracking-tight text-white group-hover:text-purple-300 transition-colors">
                 Hanan<span className="text-purple-400">.dev</span>
               </span>

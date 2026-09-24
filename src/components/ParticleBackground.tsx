@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { useIsMobile } from '../utils/useIsMobile';
 
 interface Particle {
   x: number;
@@ -11,10 +12,13 @@ interface Particle {
 }
 
 export default function ParticleBackground() {
+  const isMobile = useIsMobile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    // Respect reduced motion preferences
+    // Strictly exclude mobile devices
+    if (isMobile) return;
+
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
@@ -26,7 +30,6 @@ export default function ParticleBackground() {
     if (!ctx) return;
 
     let animationFrameId: number;
-    let isPageVisible = true;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -36,33 +39,29 @@ export default function ParticleBackground() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas, { passive: true });
 
-    // Black, Purple, and Grey palette
+    // The original rich palette: purple, light lavender, indigo, and blue
     const colors = [
-      'rgba(168, 85, 247, ', // vibrant purple
-      'rgba(192, 132, 252, ', // light lavender
       'rgba(147, 51, 234, ',  // deep purple
-      'rgba(161, 161, 170, ', // zinc grey
-      'rgba(113, 113, 122, ', // dark grey
+      'rgba(168, 85, 247, ',  // vibrant purple
+      'rgba(192, 132, 252, ', // lavender
+      'rgba(99, 102, 241, ',   // indigo
+      'rgba(59, 130, 246, ',   // blue
     ];
 
-    const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
-    const cores = navigator.hardwareConcurrency || 4;
-    const isHighGfx = !isMobile && cores >= 4;
-    // Adapt particle count to device tier: light on mobile, rich on desktop
-    const particleCount = isMobile ? 14 : isHighGfx ? 45 : 24;
+    const particleCount = 100;
 
     const particles: Particle[] = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 1.8 + 0.8,
-      speedX: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.35),
-      speedY: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.35),
-      opacity: Math.random() * 0.3 + 0.15,
+      size: Math.random() * 2 + 1,
+      speedX: (Math.random() - 0.5) * 0.5,
+      speedY: (Math.random() - 0.5) * 0.5,
+      opacity: Math.random() * 0.3 + 0.2,
       color: colors[Math.floor(Math.random() * colors.length)],
     }));
 
-    let mouseX = -1000;
-    let mouseY = -1000;
+    let mouseX = 0;
+    let mouseY = 0;
     let mouseMovedAt = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -71,64 +70,34 @@ export default function ParticleBackground() {
       mouseMovedAt = Date.now();
     };
 
-    if (!isMobile) {
-      window.addEventListener('mousemove', handleMouseMove, { passive: true });
-    }
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
 
-    // Pause rendering when tab is hidden to save battery
-    const handleVisibilityChange = () => {
-      isPageVisible = !document.hidden;
-      if (isPageVisible) {
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    };
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    let lastFrameTime = performance.now();
-    const targetFps = isMobile ? 30 : 60;
-    const frameInterval = 1000 / targetFps;
-
-    const animate = (timestamp: number) => {
-      if (!isPageVisible) return;
-
-      const currentTime = timestamp || performance.now();
-      const elapsed = currentTime - lastFrameTime;
-
-      if (elapsed < frameInterval) {
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-      lastFrameTime = currentTime - (elapsed % frameInterval);
-
-      // Pause drawing when modal is open
-      if (document.body.style.overflow === 'hidden') {
-        animationFrameId = requestAnimationFrame(animate);
-        return;
-      }
-
+    const animate = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const now = Date.now();
-      const mouseActive = !isMobile && now - mouseMovedAt < 250;
+      const mouseActive = now - mouseMovedAt < 250;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
+        // Move particle
         p.x += p.speedX;
         p.y += p.speedY;
 
+        // React to mouse
         if (mouseActive) {
           const dx = mouseX - p.x;
           const dy = mouseY - p.y;
           const dist = Math.hypot(dx, dy);
           if (dist < 100 && dist > 0) {
             const angle = Math.atan2(dy, dx);
-            p.speedX -= Math.cos(angle) * 0.03;
-            p.speedY -= Math.sin(angle) * 0.03;
+            p.speedX -= Math.cos(angle) * 0.05;
+            p.speedY -= Math.sin(angle) * 0.05;
           }
         }
 
-        // Slight natural drift
+        // Natural random drift
         p.speedX += (Math.random() - 0.5) * 0.01;
         p.speedY += (Math.random() - 0.5) * 0.01;
 
@@ -139,6 +108,7 @@ export default function ParticleBackground() {
           p.speedY = (p.speedY / speed) * maxSpeed;
         }
 
+        // Wrap around screen
         if (p.x > canvas.width) p.x = 0;
         if (p.x < 0) p.x = canvas.width;
         if (p.y > canvas.height) p.y = 0;
@@ -150,22 +120,19 @@ export default function ParticleBackground() {
         ctx.fillStyle = p.color + p.opacity + ')';
         ctx.fill();
 
-        // Connect nearby particles with subtle purple/grey glow lines on high GFX devices
-        if (isHighGfx) {
-          for (let j = i + 1; j < particles.length; j++) {
-            const p2 = particles[j];
-            const dx = p.x - p2.x;
-            const dy = p.y - p2.y;
-            const distSq = dx * dx + dy * dy;
-            if (distSq < 7500) {
-              const opacity = 0.07 * (1 - distSq / 7500);
-              ctx.beginPath();
-              ctx.moveTo(p.x, p.y);
-              ctx.lineTo(p2.x, p2.y);
-              ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
-              ctx.lineWidth = 0.7;
-              ctx.stroke();
-            }
+        // Draw connecting lines to nearby particles
+        for (let j = i + 1; j < particles.length; j++) {
+          const p2 = particles[j];
+          const dx = p.x - p2.x;
+          const dy = p.y - p2.y;
+          const dist = dx * dx + dy * dy;
+          if (dist < 10000) {
+            const opacity = 0.1 * (1 - dist / 10000);
+            ctx.beginPath();
+            ctx.moveTo(p.x, p.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+            ctx.stroke();
           }
         }
       }
@@ -173,17 +140,19 @@ export default function ParticleBackground() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    animationFrameId = requestAnimationFrame(animate);
+    animate();
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
-      if (!isMobile) {
-        window.removeEventListener('mousemove', handleMouseMove);
-      }
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [isMobile]);
+
+  // Strictly excluded on mobile devices
+  if (isMobile) {
+    return null;
+  }
 
   return (
     <canvas
