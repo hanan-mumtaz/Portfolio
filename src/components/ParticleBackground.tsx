@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
 
 interface Particle {
   x: number;
@@ -85,22 +84,23 @@ export default function ParticleBackground() {
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    let lastFrameTime = 0;
+    let lastFrameTime = performance.now();
     const targetFps = isMobile ? 30 : 60;
     const frameInterval = 1000 / targetFps;
 
     const animate = (timestamp: number) => {
       if (!isPageVisible) return;
 
-      // Throttle frame rate (e.g. 30 FPS on mobile saves 75% GPU cycles on 120Hz iPhone ProMotion)
-      const elapsed = timestamp - lastFrameTime;
+      const currentTime = timestamp || performance.now();
+      const elapsed = currentTime - lastFrameTime;
+
       if (elapsed < frameInterval) {
         animationFrameId = requestAnimationFrame(animate);
         return;
       }
-      lastFrameTime = timestamp - (elapsed % frameInterval);
+      lastFrameTime = currentTime - (elapsed % frameInterval);
 
-      // Pause canvas rendering if a modal is open
+      // Pause drawing when modal is open
       if (document.body.style.overflow === 'hidden') {
         animationFrameId = requestAnimationFrame(animate);
         return;
@@ -186,13 +186,10 @@ export default function ParticleBackground() {
   }, []);
 
   return (
-    <motion.canvas
+    <canvas
       ref={canvasRef}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
       className="fixed inset-0 pointer-events-none z-[1]"
-      style={{ willChange: 'transform', transform: 'translateZ(0)' }}
+      style={{ transform: 'translateZ(0)' }}
       aria-hidden="true"
     />
   );
