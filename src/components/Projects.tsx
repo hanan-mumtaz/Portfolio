@@ -81,7 +81,7 @@ const projects: Project[] = [
     tags: ['React Native', 'Expo Go', 'ASP.NET', 'MongoDB'],
     github: 'https://github.com/Hanan-Mumtaz/teeze',
     demo: 'https://expo.dev/accounts/hanan_mumtaz/projects/teezestore/builds/2168163f-0ffd-41c1-a036-4b89107fb83a',
-    featured: false,
+    featured: true,
   },
   {
     title: 'Matrix App',
@@ -232,7 +232,7 @@ export default function Projects() {
     return projects.filter((p) => p.category === selectedCategory);
   }, [selectedCategory]);
 
-  // Handle escape key and lock background body scrolling when modal is active
+  // Handle escape key and lock body scroll when modal is active
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setActiveModalProject(null);
@@ -327,7 +327,6 @@ export default function Projects() {
           <div className="relative">
             <Swiper
               key={selectedCategory}
-              initialSlide={0}
               spaceBetween={20}
               slidesPerView={1}
               breakpoints={{
@@ -373,61 +372,74 @@ export default function Projects() {
         )}
       </div>
 
-      {/* Project Detail Modal - Mounted via Portal to document.body strictly between Header and bottom */}
+      {/* Project Detail Modal - Mounted via Portal above all elements, maximized from above for full image showcase */}
       {typeof document !== 'undefined' &&
         createPortal(
           <AnimatePresence>
             {activeModalProject && (
               <div
-                className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md flex flex-col items-center p-3 pt-24 pb-8 sm:p-6 sm:pt-24 sm:pb-8"
+                className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md flex flex-col items-center p-3 sm:p-5 pt-3 sm:pt-4 pb-4 sm:pb-6"
                 onClick={(e) => {
                   if (e.target === e.currentTarget) setActiveModalProject(null);
                 }}
               >
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                  initial={{ opacity: 0, scale: 0.96, y: 10 }}
                   animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95, y: 15 }}
-                  transition={{ duration: 0.25 }}
-                  className="bg-zinc-950 border border-purple-500/40 rounded-2xl max-w-2xl w-full max-h-[calc(100vh-140px)] flex flex-col shadow-2xl shadow-purple-950/70 relative my-auto overflow-hidden"
+                  exit={{ opacity: 0, scale: 0.96, y: 10 }}
+                  transition={{ duration: 0.22, ease: 'easeOut' }}
+                  className="bg-zinc-950 border border-purple-500/40 rounded-2xl sm:rounded-3xl max-w-4xl w-full max-h-[95vh] flex flex-col shadow-2xl shadow-purple-950/80 relative overflow-hidden my-auto"
                 >
-                  {/* Close Button - prominent, always accessible */}
-                  <button
-                    onClick={() => setActiveModalProject(null)}
-                    className="absolute top-3.5 right-3.5 z-50 p-2.5 rounded-full bg-zinc-900/90 hover:bg-purple-600 text-zinc-200 hover:text-white border border-zinc-700 hover:border-purple-400 shadow-xl transition-all backdrop-blur-md"
-                    aria-label="Close modal"
-                  >
-                    <X size={18} />
-                  </button>
+                  {/* Top Bar: Title, Category & Close Button */}
+                  <div className="px-5 py-3.5 sm:px-7 sm:py-4 flex items-center justify-between border-b border-zinc-800/80 bg-zinc-950/95 flex-shrink-0">
+                    <div className="flex items-center gap-3 min-w-0 pr-3">
+                      <span className="px-3 py-1 rounded-full bg-purple-600/90 text-white text-[11px] sm:text-xs font-semibold uppercase tracking-wider flex-shrink-0">
+                        {activeModalProject.category}
+                      </span>
+                      <div className="min-w-0">
+                        <h3 className="text-lg sm:text-2xl font-extrabold text-white truncate">
+                          {activeModalProject.title}
+                        </h3>
+                        <p className="text-[11px] sm:text-xs text-purple-300/90 truncate font-medium">
+                          {activeModalProject.projectType}
+                        </p>
+                      </div>
+                    </div>
 
-                  {/* Modal Banner */}
-                  <div className="relative h-44 sm:h-52 w-full overflow-hidden bg-zinc-900 flex-shrink-0">
+                    <button
+                      onClick={() => setActiveModalProject(null)}
+                      className="p-2 sm:p-2.5 rounded-full bg-zinc-900/90 hover:bg-purple-600 text-zinc-300 hover:text-white border border-zinc-700/80 hover:border-purple-400 transition-all shadow-md flex-shrink-0"
+                      aria-label="Close modal"
+                    >
+                      <X size={18} />
+                    </button>
+                  </div>
+
+                  {/* Showcase Image - Generous container without text/gradient obstruction */}
+                  <div className="relative w-full aspect-[16/9] max-h-[380px] sm:max-h-[440px] bg-zinc-900/90 overflow-hidden flex-shrink-0 flex items-center justify-center border-b border-zinc-800/80">
                     <img
                       src={activeModalProject.image}
                       alt={activeModalProject.title}
-                      className="w-full h-full object-cover object-top"
+                      className="w-full h-full object-contain sm:object-cover object-top bg-zinc-950"
                       onError={(e) => {
                         (e.target as HTMLImageElement).src = activeModalProject.fallbackImage;
                       }}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
-                    <div className="absolute bottom-3 left-5 right-14">
-                      <span className="px-2.5 py-1 rounded-full bg-purple-600/90 text-white text-[11px] sm:text-xs font-semibold uppercase tracking-wider mb-1.5 inline-block">
-                        {activeModalProject.category}
-                      </span>
-                      <h3 className="text-xl sm:text-2xl md:text-3xl font-extrabold text-white">
-                        {activeModalProject.title}
-                      </h3>
-                    </div>
                   </div>
 
-                  {/* Modal Body - Scrollable content */}
-                  <div className="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
-                    <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed">
-                      {activeModalProject.longDescription || activeModalProject.description}
-                    </p>
+                  {/* Scrollable Body Content */}
+                  <div className="p-5 sm:p-7 space-y-5 overflow-y-auto flex-1 custom-scrollbar">
+                    {/* Project Overview */}
+                    <div>
+                      <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-purple-400 mb-2">
+                        Project Overview
+                      </h4>
+                      <p className="text-zinc-300 text-xs sm:text-sm md:text-base leading-relaxed">
+                        {activeModalProject.longDescription || activeModalProject.description}
+                      </p>
+                    </div>
 
-                    {/* Key Architecture Highlights */}
+                    {/* Key Engineering Highlights */}
                     <div>
                       <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-purple-400 mb-2.5">
                         Key Engineering Highlights
@@ -442,7 +454,7 @@ export default function Projects() {
                       </ul>
                     </div>
 
-                    {/* Tech Stack Pills */}
+                    {/* Technologies & Frameworks */}
                     <div>
                       <h4 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-purple-400 mb-2.5">
                         Technologies & Frameworks
@@ -458,32 +470,32 @@ export default function Projects() {
                         ))}
                       </div>
                     </div>
+                  </div>
 
-                    {/* Action Links */}
-                    <div className="flex flex-wrap gap-3 pt-3 border-t border-zinc-800/80">
-                      {activeModalProject.demo && (
-                        <a
-                          href={activeModalProject.demo}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs sm:text-sm transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-purple-900/40"
-                        >
-                          <span>Live Demo / App</span>
-                          <ExternalLink size={15} />
-                        </a>
-                      )}
-                      {activeModalProject.github && (
-                        <a
-                          href={activeModalProject.github}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-700 font-semibold text-xs sm:text-sm transition-all text-center flex items-center justify-center gap-2"
-                        >
-                          <span>View GitHub</span>
-                          <Github size={15} />
-                        </a>
-                      )}
-                    </div>
+                  {/* Pinned Action Footer */}
+                  <div className="p-4 sm:p-5 border-t border-zinc-800/90 bg-zinc-950/95 flex-shrink-0 flex flex-wrap sm:flex-nowrap gap-3">
+                    {activeModalProject.demo && (
+                      <a
+                        href={activeModalProject.demo}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs sm:text-sm transition-all text-center flex items-center justify-center gap-2 shadow-lg shadow-purple-900/40"
+                      >
+                        <span>Live Demo / App</span>
+                        <ExternalLink size={16} />
+                      </a>
+                    )}
+                    {activeModalProject.github && (
+                      <a
+                        href={activeModalProject.github}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex-1 py-2.5 sm:py-3 px-4 sm:px-6 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 hover:text-white border border-zinc-700 font-semibold text-xs sm:text-sm transition-all text-center flex items-center justify-center gap-2"
+                      >
+                        <span>View GitHub</span>
+                        <Github size={16} />
+                      </a>
+                    )}
                   </div>
                 </motion.div>
               </div>
