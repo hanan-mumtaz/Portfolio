@@ -4,6 +4,7 @@ import { Github, Linkedin, Mail, Heart, Sparkles } from 'lucide-react';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const logoImg = `${import.meta.env.BASE_URL}assets/bg5.png`;
 
   const socialLinks = [
     { href: 'https://github.com/Hanan-Mumtaz', icon: Github, label: 'GitHub' },
@@ -33,8 +34,7 @@ export default function Footer() {
               alt="Logo"
               className="h-7 w-7 sm:h-8 sm:w-8 object-contain transition-transform duration-300 group-hover:rotate-12"
             />
-            <div className="absolute inset-0 bg-purple-500/20 rounded-full blur-sm group-hover:bg-purple-500/40 transition-colors" />
-          </div>
+          
               <span className="text-xl font-bold tracking-tight text-white group-hover:text-purple-300 transition-colors">
                 Hanan<span className="text-purple-400">.dev</span>
               </span>

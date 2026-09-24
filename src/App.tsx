@@ -25,7 +25,7 @@ function App() {
         <Header />
 
         {/* Main Content Sections */}
-        <main className="relative z-10">
+        <main className="relative z-5">
           <Hero />
           <About />
           <Projects />
