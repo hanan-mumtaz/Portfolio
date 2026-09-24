@@ -43,11 +43,14 @@ export default function ParticleBackground() {
       'rgba(192, 132, 252, ', // light lavender
       'rgba(147, 51, 234, ',  // deep purple
       'rgba(161, 161, 170, ', // zinc grey
+      'rgba(113, 113, 122, ', // dark grey
     ];
 
-    const isMobile = window.innerWidth < 640;
-    // Keep particle count low on mobile for battery saving and 60fps
-    const particleCount = isMobile ? 14 : 45;
+    const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+    const cores = navigator.hardwareConcurrency || 4;
+    const isHighGfx = !isMobile && cores >= 4;
+    // Adapt particle count to device tier: light on mobile, rich on desktop
+    const particleCount = isMobile ? 16 : isHighGfx ? 50 : 28;
 
     const particles: Particle[] = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
@@ -73,7 +76,7 @@ export default function ParticleBackground() {
       window.addEventListener('mousemove', handleMouseMove, { passive: true });
     }
 
-    // Pause rendering when tab is hidden to save mobile battery
+    // Pause rendering when tab is hidden to save battery
     const handleVisibilityChange = () => {
       isPageVisible = !document.hidden;
       if (isPageVisible) {
@@ -107,6 +110,17 @@ export default function ParticleBackground() {
           }
         }
 
+        // Slight natural drift
+        p.speedX += (Math.random() - 0.5) * 0.01;
+        p.speedY += (Math.random() - 0.5) * 0.01;
+
+        const speed = Math.hypot(p.speedX, p.speedY);
+        const maxSpeed = 0.5;
+        if (speed > maxSpeed) {
+          p.speedX = (p.speedX / speed) * maxSpeed;
+          p.speedY = (p.speedY / speed) * maxSpeed;
+        }
+
         if (p.x > canvas.width) p.x = 0;
         if (p.x < 0) p.x = canvas.width;
         if (p.y > canvas.height) p.y = 0;
@@ -118,8 +132,8 @@ export default function ParticleBackground() {
         ctx.fillStyle = p.color + p.opacity + ')';
         ctx.fill();
 
-        // Only calculate connecting lines on desktop to eliminate O(N^2) load on mobile
-        if (!isMobile) {
+        // Connect nearby particles with subtle purple/grey glow lines on high GFX devices
+        if (isHighGfx) {
           for (let j = i + 1; j < particles.length; j++) {
             const p2 = particles[j];
             const dx = p.x - p2.x;

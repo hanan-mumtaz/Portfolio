@@ -36,6 +36,7 @@ export default function Footer() {
               </span>
             </a>
             <p className="text-xs text-zinc-500 max-w-xs">
+              Designing and developing intelligent, high-impact web and mobile experiences.
               Computer Science student building personal full-stack web, mobile, and AI projects.
             </p>
           </div>
@@ -56,6 +57,8 @@ export default function Footer() {
           {/* Socials & Status */}
           <div className="flex flex-col items-center md:items-end gap-3">
             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-900/80 border border-purple-500/20 text-xs text-zinc-300">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              <span>Available for opportunities</span>
               <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
               <span>Building & Learning</span>
             </div>
