@@ -98,7 +98,7 @@ export default function About() {
                 Over the past 1 to 3 years, I have dedicated myself to hands-on programming through self-initiated projects. Rather than corporate work, I have focused on architecting and completing my own full-stack web and mobile apps, as well as researching multimodal deep learning to turn theoretical knowledge into functional code.
               </p>
               <div className="flex flex-wrap gap-2 text-xs font-medium text-purple-300">
-                {['1-3 Years Self-Driven Projects', 'Clean Code', 'Hands-on Builder', 'Curious Learner'].map((tag) => (
+                {['1-3 Years Self-Driven Projects', 'Clean Code', 'Hands-on Builder'].map((tag) => (
                   <span key={tag} className="px-3 py-1 rounded-full bg-purple-950/40 border border-purple-500/25 flex items-center gap-1.5 text-[11px] sm:text-xs">
                     <CheckCircle2 className="w-3.5 h-3.5 text-purple-400" />
                     {tag}

@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { useIsMobile } from '../utils/useIsMobile';
+import { motion } from 'framer-motion';
 
 interface Particle {
   x: number;
@@ -12,13 +12,10 @@ interface Particle {
 }
 
 export default function ParticleBackground() {
-  const isMobile = useIsMobile();
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    // Strictly exclude mobile devices
-    if (isMobile) return;
-
+    // Respect reduced motion preferences
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
       return;
     }
@@ -30,6 +27,7 @@ export default function ParticleBackground() {
     if (!ctx) return;
 
     let animationFrameId: number;
+    let isPageVisible = true;
 
     const resizeCanvas = () => {
       canvas.width = window.innerWidth;
@@ -39,29 +37,33 @@ export default function ParticleBackground() {
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas, { passive: true });
 
-    // The original rich palette: purple, light lavender, indigo, and blue
+    // Black, Purple, and Grey palette
     const colors = [
+      'rgba(168, 85, 247, ', // vibrant purple
+      'rgba(192, 132, 252, ', // light lavender
       'rgba(147, 51, 234, ',  // deep purple
-      'rgba(168, 85, 247, ',  // vibrant purple
-      'rgba(192, 132, 252, ', // lavender
-      'rgba(99, 102, 241, ',   // indigo
-      'rgba(59, 130, 246, ',   // blue
+      'rgba(161, 161, 170, ', // zinc grey
+      'rgba(113, 113, 122, ', // dark grey
     ];
 
-    const particleCount = 100;
+    const isMobile = window.innerWidth < 768 || 'ontouchstart' in window;
+    const cores = navigator.hardwareConcurrency || 4;
+    const isHighGfx = !isMobile && cores >= 4;
+    // Adapt particle count to device tier: light on mobile, rich on desktop
+    const particleCount = isMobile ? 16 : isHighGfx ? 50 : 28;
 
     const particles: Particle[] = Array.from({ length: particleCount }, () => ({
       x: Math.random() * canvas.width,
       y: Math.random() * canvas.height,
-      size: Math.random() * 2 + 1,
-      speedX: (Math.random() - 0.5) * 0.5,
-      speedY: (Math.random() - 0.5) * 0.5,
-      opacity: Math.random() * 0.3 + 0.2,
+      size: Math.random() * 1.8 + 0.8,
+      speedX: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.35),
+      speedY: (Math.random() - 0.5) * (isMobile ? 0.2 : 0.35),
+      opacity: Math.random() * 0.3 + 0.15,
       color: colors[Math.floor(Math.random() * colors.length)],
     }));
 
-    let mouseX = 0;
-    let mouseY = 0;
+    let mouseX = -1000;
+    let mouseY = -1000;
     let mouseMovedAt = 0;
 
     const handleMouseMove = (e: MouseEvent) => {
@@ -70,34 +72,45 @@ export default function ParticleBackground() {
       mouseMovedAt = Date.now();
     };
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    if (!isMobile) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    }
+
+    // Pause rendering when tab is hidden to save battery
+    const handleVisibilityChange = () => {
+      isPageVisible = !document.hidden;
+      if (isPageVisible) {
+        animationFrameId = requestAnimationFrame(animate);
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     const animate = () => {
+      if (!isPageVisible) return;
+
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
       const now = Date.now();
-      const mouseActive = now - mouseMovedAt < 250;
+      const mouseActive = !isMobile && now - mouseMovedAt < 250;
 
       for (let i = 0; i < particles.length; i++) {
         const p = particles[i];
 
-        // Move particle
         p.x += p.speedX;
         p.y += p.speedY;
 
-        // React to mouse
         if (mouseActive) {
           const dx = mouseX - p.x;
           const dy = mouseY - p.y;
           const dist = Math.hypot(dx, dy);
           if (dist < 100 && dist > 0) {
             const angle = Math.atan2(dy, dx);
-            p.speedX -= Math.cos(angle) * 0.05;
-            p.speedY -= Math.sin(angle) * 0.05;
+            p.speedX -= Math.cos(angle) * 0.03;
+            p.speedY -= Math.sin(angle) * 0.03;
           }
         }
 
-        // Natural random drift
+        // Slight natural drift
         p.speedX += (Math.random() - 0.5) * 0.01;
         p.speedY += (Math.random() - 0.5) * 0.01;
 
@@ -108,7 +121,6 @@ export default function ParticleBackground() {
           p.speedY = (p.speedY / speed) * maxSpeed;
         }
 
-        // Wrap around screen
         if (p.x > canvas.width) p.x = 0;
         if (p.x < 0) p.x = canvas.width;
         if (p.y > canvas.height) p.y = 0;
@@ -120,19 +132,22 @@ export default function ParticleBackground() {
         ctx.fillStyle = p.color + p.opacity + ')';
         ctx.fill();
 
-        // Draw connecting lines to nearby particles
-        for (let j = i + 1; j < particles.length; j++) {
-          const p2 = particles[j];
-          const dx = p.x - p2.x;
-          const dy = p.y - p2.y;
-          const dist = dx * dx + dy * dy;
-          if (dist < 10000) {
-            const opacity = 0.1 * (1 - dist / 10000);
-            ctx.beginPath();
-            ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p2.x, p2.y);
-            ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
-            ctx.stroke();
+        // Connect nearby particles with subtle purple/grey glow lines on high GFX devices
+        if (isHighGfx) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const p2 = particles[j];
+            const dx = p.x - p2.x;
+            const dy = p.y - p2.y;
+            const distSq = dx * dx + dy * dy;
+            if (distSq < 7500) {
+              const opacity = 0.07 * (1 - distSq / 7500);
+              ctx.beginPath();
+              ctx.moveTo(p.x, p.y);
+              ctx.lineTo(p2.x, p2.y);
+              ctx.strokeStyle = `rgba(168, 85, 247, ${opacity})`;
+              ctx.lineWidth = 0.7;
+              ctx.stroke();
+            }
           }
         }
       }
@@ -140,26 +155,27 @@ export default function ParticleBackground() {
       animationFrameId = requestAnimationFrame(animate);
     };
 
-    animate();
+    animationFrameId = requestAnimationFrame(animate);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
-      window.removeEventListener('mousemove', handleMouseMove);
+      if (!isMobile) {
+        window.removeEventListener('mousemove', handleMouseMove);
+      }
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [isMobile]);
-
-  // Strictly excluded on mobile devices
-  if (isMobile) {
-    return null;
-  }
+  }, []);
 
   return (
-    <canvas
+    <motion.canvas
       ref={canvasRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 1 }}
       className="fixed inset-0 pointer-events-none z-[1]"
-      style={{ transform: 'translateZ(0)' }}
       aria-hidden="true"
     />
   );
 }
+

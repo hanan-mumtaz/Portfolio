@@ -34,7 +34,6 @@ export default function Hero() {
     { label: 'Independent Learning', value: '1-3 Yrs' },
     { label: 'Self-Built Projects', value: '5+' },
     { label: 'Technologies Practiced', value: '10+' },
-    { label: 'Curiosity & Dedication', value: '100%' },
   ];
 
   const profileFallback = `${import.meta.env.BASE_URL}assets/profile-D6iLI1Rc.jpg`;
@@ -142,7 +141,7 @@ export default function Hero() {
 
             {/* Honest Stats Grid */}
             <motion.div
-              className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mt-8 sm:mt-10 pt-6 border-t border-zinc-800/80 max-w-xl mx-auto lg:mx-0"
+              className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 mt-8 sm:mt-10 pt-6 border-t border-zinc-800/80 max-w-xl mx-auto lg:mx-0"
               initial={isMobile ? false : { opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.45, duration: 0.5 }}
